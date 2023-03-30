@@ -1,19 +1,26 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  const Pizza = await ethers.getContractFactory("Pizza");
 
-  const lockedAmount = ethers.utils.parseEther("0.001");
+// Deploy a new instance of the Pizza contract using the upgrades plugin
+// The contract is initialized with an array of arguments, where the first argument is the number of slices
+  const pizza = await upgrades.deployProxy(Pizza, [8], {initializer: "initialize",});
+  await pizza.deployed();
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  console.log("Pizza Proxy deployed to: ", pizza.address);
+  
+  // IF NEEDED
 
-  await lock.deployed();
+  console.log("Impl address: ", await upgrades.erc1967.getImplementationAddress(pizza.address));
+  console.log("Proxy Admin address should be Address(0): ", await upgrades.erc1967.getAdminAddress(pizza.address));
 
-  console.log(
-    `Lock with ${ethers.utils.formatEther(lockedAmount)}ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+  const PizzaV2 = await ethers.getContractFactory("PizzaV2");
+  const pizzaV2 = await upgrades.upgradeProxy(pizza.address, PizzaV2);
+  
+  const newOwner = "Add Your new Owner Address";
+  await upgrades.admin.transferProxyAdminOwnership(newOwner);
+  console.log("Transferred ownership of ProxyAdmin to:", newOwner);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
