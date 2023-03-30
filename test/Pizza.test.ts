@@ -58,8 +58,12 @@ async function main() {
     })
 
     it("Test Upgrading Proxy with new Implementation", async () => {
+      const oldPizzaImpl = await upgrades.erc1967.getImplementationAddress(pizza.address);
       const PizzaV2 = await ethers.getContractFactory("PizzaV2");
       pizzaV2 = await upgrades.upgradeProxy(pizza.address, PizzaV2);
+      const newPizzaImpl = await upgrades.erc1967.getImplementationAddress(pizza.address);
+
+      expect(oldPizzaImpl).to.not.equal(newPizzaImpl);
     })
   });
 }
