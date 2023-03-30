@@ -1,4 +1,4 @@
-# Sample Hardhat Project
+# Upgradeable Contracts Starter Kit
 
 # Steps:
 
