@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
+import "@nomiclabs/hardhat-etherscan";
 
 dotenv.config();
 task("accounts", "Prints the list of accounts", async (args, hre) => {
@@ -19,10 +20,10 @@ export default {
     // localhost: {
     //   url: "http://127.0.0.1:8545",
     // },
-    // goerli: {
-    //   url: `https://eth-goerli.g.alchemy.com/v2/${process.env.GOERLI_API_KEY}`,
-    //   accounts: [process.env.PRIVATE_KEY],
-    // },
+    goerli: {
+      url: `https://goerli.infura.io/v3/${process.env.GOERLI_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY],
+    },
     sepolia: {
       url: `https://sepolia.infura.io/v3/${process.env.SEPOLIA_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
@@ -102,7 +103,7 @@ export default {
 
   etherscan: {
     apiKey: {
-    //   goerli: process.env.ETHERSCAN_API_FOR_ETHEREUM,
+      goerli: process.env.ETHERSCAN_API_FOR_ETHEREUM,
       sepolia: process.env.ETHERSCAN_API_FOR_ETHEREUM,
     //   testnet: process.env.ETHERSCAN_API_FOR_BSC,
     //   mumbai: process.env.ETHERSCAN_API_FOR_ETHEREUM,

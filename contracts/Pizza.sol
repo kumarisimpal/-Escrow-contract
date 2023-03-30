@@ -16,6 +16,8 @@ contract Pizza is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     error InvalidSliceCount(); // Error to be thrown when an invalid number is provided.
     error NoSlicesLeft();
 
+// ALWAYS INCLUDE THE FOLLOWING COMMENT AS IT IS TO ALLOW DEPLOYMENT THROUGH HARDHAT
+
 /// @custom:oz-upgrades-unsafe-allow constructor 
     constructor() {
         _disableInitializers();

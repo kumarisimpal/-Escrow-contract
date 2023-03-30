@@ -15,10 +15,12 @@ async function main() {
 
       // Deploy a new instance of the Pizza contract using the upgrades plugin
       // The contract is initialized with an array of arguments, where the first argument is the number of slices
-      pizza = await upgrades.deployProxy(Pizza, [8], {
-        initializer: "initialize",
-      });
+      pizza = await upgrades.deployProxy(Pizza, [8], {initializer: "initialize",});
       await pizza.deployed();
+
+      // let versionAwareContractName = await pizza.getContractNameWithVersion();
+      // console.log("name and verison: ", versionAwareContractName);
+
     });
 
     it("Test proxy deployment", async () => {

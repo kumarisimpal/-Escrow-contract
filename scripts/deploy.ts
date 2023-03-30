@@ -16,7 +16,9 @@ async function main() {
   
   /**
    * Will need to verify Implementation Address to get "Is Proxy" feature on Etherscan
-   * Do that by npx hardhat verify --network <yourNetwork> <Impl_Contract_Address>
+   * Do that by 
+   * 
+   * npx hardhat verify --network <yourNetwork> <Impl_Contract_Address>
    */
 
   // console.log("Proxy Admin address should be Address(0): ", await upgrades.erc1967.getAdminAddress(pizza.address));
