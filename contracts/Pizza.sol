@@ -16,6 +16,11 @@ contract Pizza is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     error InvalidSliceCount(); // Error to be thrown when an invalid number is provided.
     error NoSlicesLeft();
 
+/// @custom:oz-upgrades-unsafe-allow constructor 
+    constructor() {
+        _disableInitializers();
+    }
+
     ///@dev decrements the slices when called
     function eatSlice() external {
         // require(slices > 1, "no slices left");
@@ -36,6 +41,6 @@ contract Pizza is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     }
 
     ///@dev required by the OZ UUPS module
-    ///@dev INCLUDE THIS FUNCTION AT ALL COSTS IN ALL IMPLEMENTATIONS OTHERWISE IT WON"T BE UPGRADED
+    ///@dev INCLUDE THIS FUNCTION AT ALL COSTS IN ALL IMPLEMENTATIONS OTHERWISE IT WON'T BE UPGRADED
     function _authorizeUpgrade(address) internal override onlyOwner {}
 }
