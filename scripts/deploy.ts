@@ -14,9 +14,10 @@ async function main() {
 
   console.log("Impl address: ", await upgrades.erc1967.getImplementationAddress(pizza.address));
   console.log("Proxy Admin address should be Address(0): ", await upgrades.erc1967.getAdminAddress(pizza.address));
-
+  
   const PizzaV2 = await ethers.getContractFactory("PizzaV2");
-  const pizzaV2 = await upgrades.upgradeProxy(pizza.address, PizzaV2);
+  await upgrades.upgradeProxy(pizza.address, PizzaV2);
+  console.log("New Impl address: ", await upgrades.erc1967.getImplementationAddress(pizza.address));
   
   const newOwner = "Add Your new Owner Address";
   await upgrades.admin.transferProxyAdminOwnership(newOwner);
