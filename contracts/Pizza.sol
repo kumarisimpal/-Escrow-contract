@@ -16,10 +16,6 @@ contract Pizza is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     error InvalidSliceCount(); // Error to be thrown when an invalid number is provided.
     error NoSlicesLeft();
 
-    constructor() {
-        _disableInitializers();
-    }
-
     ///@dev decrements the slices when called
     function eatSlice() external {
         // require(slices > 1, "no slices left");
