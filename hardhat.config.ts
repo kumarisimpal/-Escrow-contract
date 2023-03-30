@@ -23,10 +23,10 @@ export default {
     //   url: `https://eth-goerli.g.alchemy.com/v2/${process.env.GOERLI_API_KEY}`,
     //   accounts: [process.env.PRIVATE_KEY],
     // },
-    // sepolia: {
-    //   url: `https://sepolia.infura.io/v3/${process.env.SEPOLIA_API_KEY}`,
-    //   accounts: [process.env.PRIVATE_KEY],
-    // },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${process.env.SEPOLIA_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY],
+    },
     // testnet: {
     //   url: "https://bsctestapi.terminet.io/rpc",
     //   chainId: 97,
@@ -101,9 +101,9 @@ export default {
   },
 
   etherscan: {
-    // apiKey: {
+    apiKey: {
     //   goerli: process.env.ETHERSCAN_API_FOR_ETHEREUM,
-    //   sepolia: process.env.ETHERSCAN_API_FOR_ETHEREUM,
+      sepolia: process.env.ETHERSCAN_API_FOR_ETHEREUM,
     //   testnet: process.env.ETHERSCAN_API_FOR_BSC,
     //   mumbai: process.env.ETHERSCAN_API_FOR_ETHEREUM,
     //   avalanche: process.env.ETHERSCAN_API_FOR_ETHEREUM,
@@ -113,7 +113,7 @@ export default {
     //   PolygonMainnet: process.env.ETHERSCAN_API_FOR_ETHEREUM,
     //   AvalancheMainnet: process.env.ETHERSCAN_API_FOR_ETHEREUM,
     //   FantomMainnet: process.env.ETHERSCAN_API_FOR_ETHEREUM
-    // }
+    }
   },
 
   solidity: {
