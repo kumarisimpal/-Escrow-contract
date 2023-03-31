@@ -17,9 +17,9 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 
 export default {
   networks: {
-    // localhost: {
-    //   url: "http://127.0.0.1:8545",
-    // },
+    localhost: {
+      url: "http://127.0.0.1:8545",
+    },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.GOERLI_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
@@ -96,6 +96,10 @@ export default {
       //   mnemonic: process.env.MNEMONIC,
       //   count: 1500,
       // },
+      forking: {
+        url: `https://eth.llamarpc.com`, // INPUT YOUR MAINNET RPC URL
+        // blockNumber: 14390000
+      },
       chainId: 1337,
       allowUnlimitedContractSize: true,
     },

@@ -8,10 +8,11 @@
 4. Add the respective keys
 5. You are ready to get started on your project
 
-Clone this repo for basic initial setup with Upgradeable contracts
+Clone this repo for basic initial setup with gas efficient UUPS Upgradeable contracts
 
 # What does this include?
 
 1. .env.example as per our requirements
 2. hardhat.config.ts with all utilities and urls for almost all necessary chains
 3. Test cases with EVENTS, CUSTOM ERRORS
+4. Test on MAINNET FORK before deploying on Mainnet

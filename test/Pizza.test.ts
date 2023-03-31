@@ -7,7 +7,6 @@ import "@nomiclabs/hardhat-etherscan";
 
 async function main() {
   let pizza: any;
-  let pizzaV2: any;
 
   describe("Pizza Test", async () => {
     beforeEach("Before Each", async () => {
@@ -17,10 +16,6 @@ async function main() {
       // The contract is initialized with an array of arguments, where the first argument is the number of slices
       pizza = await upgrades.deployProxy(Pizza, [8], {initializer: "initialize",});
       await pizza.deployed();
-
-      // let versionAwareContractName = await pizza.getContractNameWithVersion();
-      // console.log("name and verison: ", versionAwareContractName);
-
     });
 
     it("Test proxy deployment", async () => {
@@ -62,7 +57,7 @@ async function main() {
     it("Test Upgrading Proxy with new Implementation", async () => {
       const oldPizzaImpl = await upgrades.erc1967.getImplementationAddress(pizza.address);
       const PizzaV2 = await ethers.getContractFactory("PizzaV2");
-      pizzaV2 = await upgrades.upgradeProxy(pizza.address, PizzaV2);
+      await upgrades.upgradeProxy(pizza.address, PizzaV2);
       const newPizzaImpl = await upgrades.erc1967.getImplementationAddress(pizza.address);
 
       expect(oldPizzaImpl).to.not.equal(newPizzaImpl);
