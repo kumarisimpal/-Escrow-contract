@@ -14,7 +14,7 @@ contract PizzaV2 is Pizza {
        return 2;
    }
 
-    ///@dev required by the OZ UUPS module
-    ///@dev INCLUDE THIS FUNCTION AT ALL COSTS IN ALL IMPLEMENTATIONS OTHERWISE IT WON'T BE UPGRADED
-    function _authorizeUpgrade(address) internal override onlyOwner {}
+    // ///@dev required by the OZ UUPS module
+    // ///@dev INCLUDE THIS FUNCTION AT ALL COSTS IN ALL IMPLEMENTATIONS OTHERWISE IT WON'T BE UPGRADED
+    // function _authorizeUpgrade(address) internal override onlyOwner {}
 }

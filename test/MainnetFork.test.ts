@@ -12,13 +12,13 @@ describe("Pizza Contract", async () => {
             impersonatedSigner = await ethers.getImpersonatedSigner(whale);
 
             const Pizza = await ethers.getContractFactory("Pizza");
-            // pizza = await Pizza.connect(impersonatedSigner).deploy();
             pizza = await upgrades.deployProxy(Pizza, [8], {initializer: "initialize",});
             await pizza.deployed();
         })
         
         it("Test if it's Mainnet Fork", async () => {
            console.log("Whale Balance: ", await provider.getBalance(impersonatedSigner.address));
+           console.log("Owner Address i.e. Account #0 in Hardhat Nodes: ", await pizza.owner());
         });
         
         it("Test proxy deployment", async () => {
@@ -64,6 +64,14 @@ describe("Pizza Contract", async () => {
             const newPizzaImpl = await upgrades.erc1967.getImplementationAddress(pizza.address);
       
             expect(oldPizzaImpl).to.not.equal(newPizzaImpl);
+
+            // AGAIN UPGRADE
+
+            const PizzaImpl3 = await ethers.getContractFactory("Pizza");
+            await upgrades.upgradeProxy(pizza.address, PizzaImpl3);
+            const pizzaImpl3 = await upgrades.erc1967.getImplementationAddress(pizza.address);
+
+            expect(newPizzaImpl).to.not.equal(pizzaImpl3);
         })
     })
 })
