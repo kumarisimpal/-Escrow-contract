@@ -20,14 +20,14 @@ export default {
     localhost: {
       url: "http://127.0.0.1:8545",
     },
-    goerli: {
-      url: `https://goerli.infura.io/v3/${process.env.GOERLI_API_KEY}`,
-      accounts: [process.env.PRIVATE_KEY],
-    },
-    sepolia: {
-      url: `https://sepolia.infura.io/v3/${process.env.SEPOLIA_API_KEY}`,
-      accounts: [process.env.PRIVATE_KEY],
-    },
+    // goerli: {
+    //   url: `https://goerli.infura.io/v3/${process.env.GOERLI_API_KEY}`,
+    //   accounts: [process.env.PRIVATE_KEY],
+    // },
+    // sepolia: {
+    //   url: `https://sepolia.infura.io/v3/${process.env.SEPOLIA_API_KEY}`,
+    //   accounts: [process.env.PRIVATE_KEY],
+    // },
     // testnet: {
     //   url: "https://bsctestapi.terminet.io/rpc",
     //   chainId: 97,
@@ -107,9 +107,9 @@ export default {
 
   etherscan: {
     apiKey: {
-      goerli: process.env.ETHERSCAN_API_FOR_ETHEREUM,
-      sepolia: process.env.ETHERSCAN_API_FOR_ETHEREUM,
-    //   testnet: process.env.ETHERSCAN_API_FOR_BSC,
+      // goerli: process.env.ETHERSCAN_API_FOR_ETHEREUM,
+      // sepolia: process.env.ETHERSCAN_API_FOR_ETHEREUM,
+      testnet: process.env.ETHERSCAN_API_FOR_BSC,
     //   mumbai: process.env.ETHERSCAN_API_FOR_ETHEREUM,
     //   avalanche: process.env.ETHERSCAN_API_FOR_ETHEREUM,
     //   fantom: process.env.ETHERSCAN_API_FOR_ETHEREUM,
@@ -122,7 +122,7 @@ export default {
   },
 
   solidity: {
-    version: "0.8.17",
+    version: "0.8.18",
     settings: {
       optimizer: {
         enabled: true,
