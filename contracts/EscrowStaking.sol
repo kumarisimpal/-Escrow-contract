@@ -1,74 +1,114 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-// Open Zeppelin libraries for controlling upgradability and access.
-// import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "hardhat/console.sol";
 
-contract EscrowStaking is Initializable, UUPSUpgradeable, AccessControl, ReentrancyGuard {
+contract EscrowStaking is UUPSUpgradeable,
+  ReentrancyGuard,
+  AccessControlUpgradeable,
+  OwnableUpgradeable
+   {
+    bytes32 constant DEVELOPER_ROLE = keccak256("DEVELOPER_ROLE");
+    bytes32 constant ADMIN_ROLE = keccak256("ADMIN_ROLE");  
+  
     IERC20 public token;
-    address private _admin;
+
+    mapping(address => bool) public admin;
+    mapping(address => bool) public developer;
+    mapping(address => bool) public whiteListed;
 
     // EVENTS
-    event transferredAdminship(address newAdmin);
     event successfulDeposit();
     event successfulWithdraw();
-    event AdminshipTransferred(address indexed oldAdmin, address indexed newAdmin);
-
 
     // CUSTOM ERRORS
     error AddressZero();
+    error youAreNotAdmin();
+    error youAreNotDeveloper();
+    error InvalidAmount();
+    error tokenNotWhiteListed();
 
     modifier addressZeroCheck(address to) {
-        if(to == address(0)){
+        if (to == address(0)) {
             revert AddressZero();
         }
         _;
     }
 
-    modifier onlyAdmin {
-      require(msg.sender == _admin);
-      _;
-   }
+    modifier onlyAdmin() {
+        if(admin[msg.sender] == false) {
+            revert youAreNotAdmin();
+        }
+        _;
+    } 
+
+     modifier onlyDeveloper() {
+        if(developer[msg.sender] == false){
+            revert youAreNotDeveloper();
+        }
+        _;
+    } 
 
     constructor() {
         _disableInitializers();
     }
 
-
-    function initialize(IERC20 _token) external initializer {
+    function initialize(
+        IERC20 _token
+    ) external initializer {
+       
         token = _token;
-
+        __Ownable_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        console.log("owner_address4",address(this));
+        console.log("owner_address5",msg.sender);
+
     }
 
-    function transferAdminship(address newAdmin) public virtual onlyAdmin() {
-        require(newAdmin != address(0), "Ownable: new owner is the zero address");
-        _transferAdminship(newAdmin);
-        emit transferredAdminship(newAdmin);
+    function setAdmin(
+        address _newAdmin
+    ) external addressZeroCheck(_newAdmin) onlyOwner {
+        admin[_newAdmin] = true;
+        _setupRole(ADMIN_ROLE, _newAdmin);
+
+    
     }
 
-    function deposit(uint256 amount) public  onlyAdmin{
-        require(amount > 0," Token amount must be greater than 0");
+    function setDeveloper(
+        address _newDeveloper
+    ) external addressZeroCheck(_newDeveloper) onlyAdmin() {
+        developer[_newDeveloper] = true;
+        _setupRole(DEVELOPER_ROLE, _newDeveloper);
+    }
+
+    function setWhiteList(address listOfAddresses) public addressZeroCheck(listOfAddresses) onlyOwner {       
+        whiteListed[listOfAddresses] = true;
+    }
+
+
+    function deposit(address _token, uint256 amount) public onlyAdmin {
+        if(amount == 0){
+            revert InvalidAmount();
+        }
+        if(whiteListed[_token] == false){
+            revert tokenNotWhiteListed();
+        }
         token.transferFrom(msg.sender, address(this), amount);
         emit successfulDeposit();
     }
 
-     function withdraw (address developer, uint256 amount) public addressZeroCheck(developer){
-        require(amount > 0," Token amount must be greater than 0");
-        token.transfer(developer, amount);
+    function withdraw(uint256 amount) public onlyDeveloper{
+        if(amount == 0){
+            revert InvalidAmount();
+        }
+        token.transfer(msg.sender, amount);
         emit successfulWithdraw();
     }
 
-    function _transferAdminship(address newAdmin) internal virtual {
-        address oldAdmin = _admin;
-        _admin = newAdmin;
-        emit AdminshipTransferred(oldAdmin, newAdmin);
-    }
-
-    function _authorizeUpgrade(address) internal override onlyAdmin() {}
+    function _authorizeUpgrade(address) internal override onlyAdmin {}
 }
