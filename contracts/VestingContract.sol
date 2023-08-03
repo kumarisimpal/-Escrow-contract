@@ -1,26 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.12;
 
 import "contracts/interfaces/IERC20.sol";
-// import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "contracts/EscrowStaking.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 
-contract VestingStaking is EscrowStaking{
+contract VestingStaking is ReentrancyGuard{
    
     bool public isVestingStarted;
     bool public memberParamsSet;
     address public userAddress;
 
 
-    // IERC20 public token;
+    IERC20 public token;
     uint256 public totalSupply;
     uint256 public dayInSeconds;
-
-    // modifier addressZeroCheck(address _addr) {
-    //     require(_addr != address(0), "Address Zero");
-    //     _;
-    // }
 
     // STRUCTS
     struct Member {
@@ -53,7 +47,8 @@ contract VestingStaking is EscrowStaking{
 
     function startVesting() external {
         require(!isVestingStarted, "Vesting Already Started");
-        bool success = token.transferFrom(
+        console.log("BBBBBBBB",msg.sender,address(this),totalSupply);
+        bool success = IERC20(token).transferFrom(
             msg.sender,
             address(this),
             totalSupply

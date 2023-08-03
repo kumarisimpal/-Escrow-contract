@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-ethers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { EscrowStaking, EscrowStaking__factory, OwnedUpgradeabilityProxy, OwnedUpgradeabilityProxy__factory, TokenA, TokenA__factory } from "../typechain";
+import { EscrowStaking, EscrowStaking__factory, OwnedUpgradeabilityProxy, OwnedUpgradeabilityProxy__factory, TokenA, TokenA__factory, VestingStaking, VestingStaking__factory } from "../typechain";
 
 describe("EscrowStaking test cases", async()=>{
     let owner: SignerWithAddress;
@@ -14,6 +14,7 @@ describe("EscrowStaking test cases", async()=>{
     let token: TokenA;
     let proxy: OwnedUpgradeabilityProxy;
     let staking: EscrowStaking;
+    let vesting: VestingStaking;
 
     beforeEach("beforeEach",async()=>{
         [owner,user1,user2,user3,...users] = await ethers.getSigners();
@@ -23,6 +24,7 @@ describe("EscrowStaking test cases", async()=>{
         await proxy.upgradeTo(staking.address);
         staking = await new EscrowStaking__factory(owner).attach(proxy.address);
         await staking.connect(owner).initialize(token.address);
+        vesting =await new VestingStaking__factory(owner).deploy(token.address,user3.address);
 
     });
     
@@ -88,5 +90,15 @@ describe("EscrowStaking test cases", async()=>{
         await staking.connect(owner).setWhiteList(token.address);
         await staking.connect(user1).deposit(token.address,100,{gasLimit: 30000000});
         await expect (staking.connect(user1).withdraw(10,{gasLimit: 30000000})).to.be.revertedWithCustomError(staking,"youAreNotDeveloper");
+    });
+
+    it.only("vesting: start vesting ",async()=>{
+        await token.connect(owner).mint(user1.address,100000 ,{gasLimit: 30000000});
+        await staking.connect(owner).setAdmin(user1.address,{gasLimit: 30000000});
+        await token.connect(user1).approve(staking.address,100000);
+        await staking.connect(owner).setWhiteList(token.address);
+        await staking.connect(user1).deposit(token.address,10000,{gasLimit: 30000000});
+        await token.connect(user1).approve(vesting.address,10000)
+        await vesting.connect(user1).startVesting();
     });
 })

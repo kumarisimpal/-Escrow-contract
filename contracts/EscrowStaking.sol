@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.12;
 
 import "contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -73,6 +73,7 @@ contract EscrowStaking is UUPSUpgradeable,
     function setAdmin(
         address _newAdmin
     ) external addressZeroCheck(_newAdmin) onlyOwner {
+        console.log("_newAdmin", _newAdmin);
         admin[_newAdmin] = true;
         _setupRole(ADMIN_ROLE, _newAdmin);
 
