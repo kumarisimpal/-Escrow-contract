@@ -8,16 +8,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 
-contract EscrowStaking is UUPSUpgradeable,
-  ReentrancyGuard,
-  AccessControlUpgradeable,
-  OwnableUpgradeable
-   {
+contract EscrowStaking is UUPSUpgradeable, ReentrancyGuard, AccessControlUpgradeable, OwnableUpgradeable {
     bytes32 constant DEVELOPER_ROLE = keccak256("DEVELOPER_ROLE");
     bytes32 constant ADMIN_ROLE = keccak256("ADMIN_ROLE");  
   
     IERC20 public token;
-
+  
     mapping(address => bool) public admin;
     mapping(address => bool) public developer;
     mapping(address => bool) public whiteListed;
@@ -61,19 +57,16 @@ contract EscrowStaking is UUPSUpgradeable,
     function initialize(
         IERC20 _token
     ) external initializer {
-       
+
         token = _token;
         __Ownable_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        console.log("owner_address4",address(this));
-        console.log("owner_address5",msg.sender);
 
     }
 
     function setAdmin(
         address _newAdmin
     ) external addressZeroCheck(_newAdmin) onlyOwner {
-        console.log("_newAdmin", _newAdmin);
         admin[_newAdmin] = true;
         _setupRole(ADMIN_ROLE, _newAdmin);
 
@@ -103,11 +96,11 @@ contract EscrowStaking is UUPSUpgradeable,
         emit successfulDeposit();
     }
 
-    function withdraw(uint256 amount) public onlyDeveloper{
+    function withdraw( address _vestingContrct, uint256 amount) public onlyDeveloper{
         if(amount == 0){
             revert InvalidAmount();
         }
-        token.transfer(msg.sender, amount);
+        token.transfer(_vestingContrct, amount);
         emit successfulWithdraw();
     }
 
