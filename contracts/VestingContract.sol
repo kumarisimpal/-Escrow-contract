@@ -1,154 +1,118 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.12;
 
 import "contracts/interfaces/IERC20.sol";
-// import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "contracts/EscrowStaking.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 
-contract VestingStaking is EscrowStaking{
+contract VestingStaking {
    
     bool public isVestingStarted;
-    bool public memberParamsSet;
-    address public userAddress;
-
-
-    // IERC20 public token;
-    uint256 public totalSupply;
+    IERC20 public token;
     uint256 public dayInSeconds;
 
-    // modifier addressZeroCheck(address _addr) {
-    //     require(_addr != address(0), "Address Zero");
-    //     _;
-    // }
-
     // STRUCTS
-    struct Member {
-        uint256 tokenPercentage; // 10000 basis points
-        uint256 monthlyPercentage;  // 10000 basis points
-        uint256 numberOfMonths;
-        uint256 lastClaimed;
-        uint256 totalTokenAmount;
-        uint256 amountClaimed;
-        address memberAddress;
-        uint256 startTime;
+    struct Stake {
+        uint256 amount;
+        uint64 unlockTime;
+        uint64 withdrawTime;
     }
 
+
     // MAPPINGS
-    mapping(address => Member) public addressToMember;
+    mapping(address => Stake) public userStake;
 
     // EVENTS
     event VestingStarted();
-    event TeamTokensClaimed(uint amountClaimed);
-    
+    event TokensClaimed(uint amountClaimed);
 
-    constructor(address _token, address _userAddress) {
-        token = IERC20(_token);
-        userAddress =_userAddress;
-        totalSupply = 5e7 * 10 ** 18;
-        dayInSeconds = 86400 seconds;   
+    error zeroAmount();
 
-        console.log("owner_address3",msg.sender);
+    constructor(IERC20 _token) {
+        token = _token;
     }
 
-    function startVesting() external {
-        require(!isVestingStarted, "Vesting Already Started");
-        bool success = token.transferFrom(
-            msg.sender,
-            address(this),
-            totalSupply
+    function startVesting() public {
+        require(!isVestingStarted, "Vesting Already Started");  
+        uint256 totalAmount = token.balanceOf(address(this));
+        userStake[msg.sender] = Stake(
+            totalAmount,
+            userStake[msg.sender].unlockTime,
+            uint64(block.timestamp)
         );
+        bool success = token.transfer(address(this), totalAmount);
 
         if(!success) revert();
-
-        _setMemberParams(userAddress);
-
         emit VestingStarted();
     }
 
-    function _setMemberParams(address _userAddress) private {
-        require(!memberParamsSet,"member params Already set");
+
+    function claimTokens() public {
+        Stake storage stake = userStake[msg.sender];
         uint64 blockTimestamp64 = uint64(block.timestamp);
-        uint128 blockTimestamp = uint128(block.timestamp);
+        uint256 totalAmount = token.balanceOf(address(this));
+        if (totalAmount == 0){
+            revert zeroAmount();
+        }
+        uint64 unlock = blockTimestamp64 - stake.withdrawTime;
+       
+        if(unlock < 30 days){
+           
+            userStake[msg.sender] = stake;
+            uint256 claimed = totalAmount * 1500 / 10000;
+            
+            token.transfer(msg.sender, claimed);
+            userStake[msg.sender] = Stake(
+                totalAmount -= totalAmount * 1500 / 10000,
+                unlock,
+                stake.withdrawTime
+            );
 
-        addressToMember[_userAddress] = Member(
-            1500, 
-            0,
-            0,
-            blockTimestamp,
-            (totalSupply * 1500) / 10000,
-            0,
-            _userAddress,
-            blockTimestamp64
-        );
+            userStake[msg.sender] = stake;
+        }
 
-        addressToMember[_userAddress] = Member(
-            3000, 
-            0,
-            30,
-            blockTimestamp,
-            (totalSupply * 3000) / 10000,
-            0,
-            _userAddress,
-            blockTimestamp64
-        );
+        else if(unlock >= 30 days && unlock < 90 days){
+           
+            userStake[msg.sender] = stake;
+            uint256 claimed = totalAmount * 3000 / 10000;
 
-        addressToMember[_userAddress] = Member(
-            4500, 
-            0,
-            90,
-            blockTimestamp,
-            (totalSupply * 4500) / 10000,
-            0,
-            _userAddress,
-            blockTimestamp64
-        );
+            token.transfer(msg.sender, claimed);
+            userStake[msg.sender] = Stake(
+                totalAmount -= totalAmount * 3000 / 10000,
+                unlock,
+                stake.withdrawTime
+            );
 
-        addressToMember[_userAddress] = Member(
-            1000, 
-            0,
-            105,
-            blockTimestamp,
-            (totalSupply * 1000) / 10000,
-            0,
-            _userAddress,
-            blockTimestamp64
-        );
+            userStake[msg.sender] = stake;
+        }
 
-        memberParamsSet = true;
+        else if(unlock >= 90 days && unlock < 105 days){
+            
+            userStake[msg.sender] = stake;
+            uint256 claimed = totalAmount * 4500 / 10000;
 
-    }
+            token.transfer(msg.sender, claimed);
+            userStake[msg.sender] = Stake(
+                totalAmount -= totalAmount * 4500 / 10000,
+                unlock,
+                stake.withdrawTime
+            );
 
-    function claimTeamTokens() external {
-        Member storage member = addressToMember[userAddress];
+            userStake[msg.sender] = stake;
+        }
 
-        require(msg.sender == member.memberAddress, "ONLY_USER");
+        else if(unlock >= 105 days){
 
-        _calcTeamAdvTokens(member);
-
-        member.amountClaimed += member.totalTokenAmount;
-        member.lastClaimed = uint128(block.timestamp);
-
-        bool success = token.transfer(
-            member.memberAddress,
-            member.totalTokenAmount
-        );
-        if (!success) revert();
-
-        emit TeamTokensClaimed(member.totalTokenAmount);
-    
-    }
-
-     function _calcTeamAdvTokens(Member storage member) internal view {
-        require(
-            block.timestamp >
-                member.startTime + 24 * dayInSeconds,
-            "Vesting Period not completed"
-        );
-
-        require(
-            member.amountClaimed <= member.totalTokenAmount,
-            "Vesting Amount Exceeded"
-        );
+            userStake[msg.sender] = stake;
+            uint256 claimed = totalAmount * 1000 / 10000;
+           
+            token.transfer(msg.sender, claimed);
+            userStake[msg.sender] = Stake(
+                totalAmount -= totalAmount * 1000 / 10000,
+                unlock,
+                stake.withdrawTime
+            );
+            userStake[msg.sender] = stake;
+        }    
     }
 }
